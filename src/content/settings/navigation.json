@@ -2,7 +2,13 @@
   "items": [
     {
       "label": "test1",
-      "slug": "test1"
+      "slug": "test1",
+      "children": [
+        {
+          "label": "test2",
+          "slug": "/test1/test2"
+        }
+      ]
     }
   ]
 }
