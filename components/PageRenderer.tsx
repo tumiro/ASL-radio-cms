@@ -25,8 +25,18 @@ const PageRenderer: React.FC = () => {
     );
   }
 
-  // Funkcja sprawdzająca, czy treść wygląda na HTML (zawiera znaczniki)
-  const isHtml = (text: string) => /<\/?[a-z][\s\S]*>/i.test(text);
+  // Funkcja sprawdzająca, czy treść wygląda na HTML.
+  // Sprawdzamy obecność znaczników <tag> lub </tag>
+  const isHtml = (text: string) => {
+    if (!text) return false;
+    const trimmed = text.trim();
+    // Jeśli zaczyna się od < i kończy >, to na 99% HTML
+    if (trimmed.startsWith('<') && trimmed.endsWith('>')) return true;
+    // Lub jeśli zawiera typowe znaczniki blokowe
+    return /<\/?(h[1-6]|p|div|table|ul|ol|li|br|img|span|strong|em)[^>]*>/i.test(text);
+  };
+
+  const hasHtmlContent = isHtml(content.body);
 
   return (
     <div className="animate-in fade-in duration-500 pb-16">
@@ -49,18 +59,22 @@ const PageRenderer: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="prose prose-lg prose-slate mx-auto text-gray-600">
-          
-          {/* Logic: Jeśli tekst zawiera HTML, renderuj go jako HTML. W przeciwnym razie jako tekst z zachowaniem linii */}
-          {isHtml(content.body) ? (
-             <div dangerouslySetInnerHTML={{ __html: content.body }} />
-          ) : (
+        
+        {/* Kontener treści */}
+        {hasHtmlContent ? (
+           // Renderowanie HTML z naszą klasą .html-content
+           <div 
+             className="html-content"
+             dangerouslySetInnerHTML={{ __html: content.body }} 
+           />
+        ) : (
+           // Renderowanie zwykłego tekstu (fallback)
+           <div className="prose prose-lg prose-slate mx-auto text-gray-600">
              <p className="text-xl leading-relaxed text-gray-700 font-light mb-8 whitespace-pre-line">
                {content.body}
              </p>
-          )}
-
-        </div>
+           </div>
+        )}
 
         {/* Dynamic Sections (Legacy support for structured data) */}
         {content.sections && content.sections.length > 0 && (
