@@ -26,7 +26,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <Footer />
           {/* Version Indicator */}
           <div className="bg-gray-900 text-gray-700 text-[10px] text-center py-1">
-            Build: v2.2 (Build Fix)
+            Build: v2.3 (Fix)
           </div>
         </>
       )}

@@ -93,21 +93,23 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
     loadCmsPages();
 
     // 2. Dynamiczne ładowanie nawigacji (JSON)
-    // Używamy importu dynamicznego wewnątrz useEffect, aby błąd braku pliku nie przerywał buildu
+    // Używamy import.meta.glob zamiast zwykłego import(), co jest bezpieczniejsze dla builda
     const loadNavigation = async () => {
       try {
-        // Próbujemy zaimportować plik. Ścieżka jest relatywna do tego pliku (context/)
-        // Jeśli plik jest w src/content/settings/navigation.json
-        const navModule = await import('../src/content/settings/navigation.json');
-        if (navModule.default && navModule.default.items) {
-          setSiteConfig(prev => ({
-            ...prev,
-            navigation: navModule.default.items
-          }));
+        const navModules = import.meta.glob('../src/content/settings/navigation.json', { eager: true });
+        const navPath = '../src/content/settings/navigation.json';
+        
+        if (navModules[navPath]) {
+          const navConfig = navModules[navPath] as any;
+          if (navConfig.default && navConfig.default.items) {
+            setSiteConfig(prev => ({
+              ...prev,
+              navigation: navConfig.default.items
+            }));
+          }
         }
       } catch (e) {
-        console.warn("Nie znaleziono pliku navigation.json lub błąd ładowania. Używam domyślnej konfiguracji.", e);
-        // Nie robimy nic, zostaje domyślne SITE_CONFIG
+        console.warn("Błąd ładowania navigation.json. Używam domyślnej konfiguracji.", e);
       }
     };
 
