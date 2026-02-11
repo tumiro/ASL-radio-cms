@@ -25,15 +25,10 @@ const PageRenderer: React.FC = () => {
     );
   }
 
-  // Funkcja sprawdzająca, czy treść wygląda na HTML.
-  // Sprawdzamy obecność znaczników <tag> lub </tag>
+  // Uproszczone wykrywanie HTML. Jeśli tekst zawiera "<" i ">" oraz literę, traktujemy go jako HTML.
+  // Dzięki temu wyłapiemy mieszany tekst i wklejki z edytorów.
   const isHtml = (text: string) => {
-    if (!text) return false;
-    const trimmed = text.trim();
-    // Jeśli zaczyna się od < i kończy >, to na 99% HTML
-    if (trimmed.startsWith('<') && trimmed.endsWith('>')) return true;
-    // Lub jeśli zawiera typowe znaczniki blokowe
-    return /<\/?(h[1-6]|p|div|table|ul|ol|li|br|img|span|strong|em)[^>]*>/i.test(text);
+    return /<[a-z][\s\S]*>/i.test(text);
   };
 
   const hasHtmlContent = isHtml(content.body);
@@ -62,9 +57,9 @@ const PageRenderer: React.FC = () => {
         
         {/* Kontener treści */}
         {hasHtmlContent ? (
-           // Renderowanie HTML z naszą klasą .html-content
+           // Renderowanie HTML z klasą .html-content oraz klasami prose dla lepszej typografii
            <div 
-             className="html-content"
+             className="html-content prose prose-lg prose-slate mx-auto max-w-none text-gray-700"
              dangerouslySetInnerHTML={{ __html: content.body }} 
            />
         ) : (

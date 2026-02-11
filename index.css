@@ -1,28 +1,95 @@
-<h2>Welcome !</h2>
-<p>You can <strong>type your text</strong> directly in the editor or paste it from a Word Doc, PDF, Excel etc.</p>
-<p>The <strong>visual editor</strong> on the right and the <strong>source editor</strong> on the left are linked together and the changes are reflected in the other one as you type! <img src="https://html5-editor.net/images/smiley.png" alt="smiley" /></p>
-<table>
-<tbody>
-<tr>
-<td><strong>Name</strong></td>
-<td><strong>City</strong></td>
-<td><strong>Age</strong></td>
-</tr>
-<tr>
-<td>John</td>
-<td>Chicago</td>
-<td>23</td>
-</tr>
-<tr>
-<td>Lucy</td>
-<td>Wisconsin</td>
-<td>19</td>
-</tr>
-<tr>
-<td>Amanda</td>
-<td>Madison</td>
-<td>22</td>
-</tr>
-</tbody>
-</table>
-<p>This is a table you can experiment with.</p>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom scrollbar for chat */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Animation for the radio scanner effect in Navbar */
+@keyframes scan {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(200%); opacity: 0; }
+}
+
+.animate-scan {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, #3b82f6, transparent);
+  animation: scan 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  opacity: 0.8;
+}
+
+/* --- STYLE DLA TREŚCI HTML (WYSIWYG) --- */
+/* Te style są potrzebne, ponieważ Tailwind resetuje domyślny wygląd nagłówków i list */
+
+.html-content h1 {
+  @apply text-3xl font-bold text-gray-900 mt-8 mb-4;
+}
+
+.html-content h2 {
+  @apply text-2xl font-bold text-gray-800 mt-6 mb-4 border-b border-gray-200 pb-2;
+}
+
+.html-content h3 {
+  @apply text-xl font-semibold text-gray-800 mt-5 mb-3;
+}
+
+.html-content p {
+  @apply mb-4 leading-relaxed text-gray-700;
+}
+
+.html-content ul {
+  @apply list-disc list-outside ml-6 mb-4 text-gray-700;
+}
+
+.html-content ol {
+  @apply list-decimal list-outside ml-6 mb-4 text-gray-700;
+}
+
+.html-content strong {
+  @apply font-bold text-gray-900;
+}
+
+.html-content em {
+  @apply italic;
+}
+
+.html-content a {
+  @apply text-blue-600 hover:text-blue-800 underline;
+}
+
+/* Style dla tabeli */
+.html-content table {
+  @apply w-full border-collapse border border-gray-300 mb-6 mt-2 table-auto;
+}
+
+.html-content th {
+  @apply bg-gray-100 border border-gray-300 px-4 py-2 text-left font-semibold text-gray-900;
+}
+
+.html-content td {
+  @apply border border-gray-300 px-4 py-2 text-gray-700;
+}
+
+.html-content img {
+  @apply rounded-lg shadow-md max-w-full h-auto my-4 mx-auto;
+}
+
+.html-content blockquote {
+  @apply border-l-4 border-blue-500 pl-4 py-2 my-4 italic text-gray-600 bg-gray-50 rounded-r;
+}
