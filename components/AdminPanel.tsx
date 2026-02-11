@@ -35,8 +35,6 @@ const AdminPanel: React.FC = () => {
 
   // Debug & Auth Persistence
   useEffect(() => {
-    console.log("AdminPanel v2.4 (Persistence) loaded");
-    
     // Sprawdź, czy użytkownik był wcześniej zalogowany
     const wasLoggedIn = localStorage.getItem('localAdminLoggedIn');
     if (wasLoggedIn === 'true') {
