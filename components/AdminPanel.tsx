@@ -20,7 +20,7 @@ const AdminPanel: React.FC = () => {
   const [pageFormData, setPageFormData] = useState<PageContent | null>(null);
   const [addToMenu, setAddToMenu] = useState(false);
   
-  // Preview Mode State for Editor
+  // Preview Mode State for Editor (To jest nowa funkcja, której Ci brakowało)
   const [showHtmlPreview, setShowHtmlPreview] = useState(false);
   
   // Ref do textarea, aby móc wstawiać tekst w miejscu kursora
@@ -37,7 +37,7 @@ const AdminPanel: React.FC = () => {
   const handleEditClick = (slug: string) => {
     setEditingSlug(slug);
     setPageFormData({ ...pages[slug] });
-    setShowHtmlPreview(false);
+    setShowHtmlPreview(false); // Zawsze zaczynamy od edycji kodu
     
     // Check if page is already in navigation
     const isInNav = siteConfig.navigation.some(item => item.slug === slug);
@@ -94,7 +94,7 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  // --- TOOLBAR HANDLERS ---
+  // --- TOOLBAR HANDLERS (Logika wstawiania tagów) ---
   const insertTag = (startTag: string, endTag: string = '') => {
     if (!textAreaRef.current || !pageFormData) return;
 
@@ -111,7 +111,7 @@ const AdminPanel: React.FC = () => {
       body: newText
     });
 
-    // Restore focus and cursor position
+    // Przywróć fokus i ustaw kursor po wstawionym tagu
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(start + startTag.length, end + startTag.length);
@@ -131,10 +131,6 @@ const AdminPanel: React.FC = () => {
     <tr>
       <td>Dane 1</td>
       <td>Dane 2</td>
-    </tr>
-    <tr>
-      <td>Dane 3</td>
-      <td>Dane 4</td>
     </tr>
   </tbody>
 </table>
@@ -347,7 +343,7 @@ const AdminPanel: React.FC = () => {
                         </button>
                       </div>
                       
-                      {/* TOOLBAR (Only visible in Edit Mode) */}
+                      {/* TOOLBAR (Widoczny tylko w trybie edycji) */}
                       {!showHtmlPreview && (
                         <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-gray-50 border border-gray-300 border-b-0 rounded-t-md shadow-sm">
                           <button onClick={() => insertTag('<strong>', '</strong>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Bold"><Bold className="w-4 h-4"/></button>
