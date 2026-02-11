@@ -16,10 +16,6 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
-// NOTE: Removed import.meta.glob usage because it causes runtime errors in environments
-// that do not support Vite build-time transformations (e.g. some browser-based previews).
-// The app will initialize with data from constants.ts instead of reading from the file system.
-
 const INITIAL_MEDIA: MediaItem[] = [
   { id: '1', name: 'Antena Yagi', url: 'https://images.unsplash.com/photo-1541873676-a18131494184?auto=format&fit=crop&w=800&q=80' },
   { id: '2', name: 'Radio Shack', url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80' },
@@ -28,13 +24,15 @@ const INITIAL_MEDIA: MediaItem[] = [
 ];
 
 export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Initialize directly from constants to prevent "glob is not a function" error
   const [pages, setPages] = useState<Record<string, PageContent>>(MOCK_PAGES);
-  
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(SITE_CONFIG);
-
   const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>(INITIAL_MEDIA);
 
-  // We are skipping the useEffect that loads from import.meta.glob
+  // NOTE: We have removed the dynamic import.meta.glob logic.
+  // This ensures the application runs stably in all environments.
+  // In a real production setup with Decap CMS, the build process would need 
+  // to regenerate the 'constants' or a JSON file based on the Markdown content.
 
   const updatePage = (originalSlug: string, newPageData: PageContent) => {
     setPages((prevPages) => {
