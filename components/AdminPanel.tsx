@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useContent } from '../context/ContentContext';
-import { Layout, FileText, Settings, LogOut, Github, Search, PenTool, Save, Plus, Trash2, Image as ImageIcon, CheckSquare, ExternalLink } from 'lucide-react';
+import { Layout, FileText, Settings, LogOut, Github, Search, PenTool, Save, Plus, Trash2, Image as ImageIcon, CheckSquare, ExternalLink, Bold, Italic, List, Type, Link as LinkIcon, Table, Code } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from './ui/Button';
 import { PageContent } from '../types';
@@ -18,7 +18,10 @@ const AdminPanel: React.FC = () => {
   // Page Editor State
   const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const [pageFormData, setPageFormData] = useState<PageContent | null>(null);
-  const [addToMenu, setAddToMenu] = useState(false); // New state for navigation toggle
+  const [addToMenu, setAddToMenu] = useState(false);
+  
+  // Ref do textarea, aby móc wstawiać tekst w miejscu kursora
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   // Settings Editor State
   const [tempConfigJson, setTempConfigJson] = useState('');
@@ -32,7 +35,7 @@ const AdminPanel: React.FC = () => {
     setEditingSlug(slug);
     setPageFormData({ ...pages[slug] });
     
-    // Check if page is already in navigation (simple check on top level)
+    // Check if page is already in navigation
     const isInNav = siteConfig.navigation.some(item => item.slug === slug);
     setAddToMenu(isInNav);
   };
@@ -42,34 +45,29 @@ const AdminPanel: React.FC = () => {
       title: 'Nowa Strona',
       slug: '/nowa-strona',
       heroImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80',
-      body: 'Wpisz treść tutaj...',
+      body: '<p>Wpisz treść tutaj...</p>',
       sections: []
     };
     setEditingSlug('NEW');
     setPageFormData(newPage);
-    setAddToMenu(true); // Default to true for new pages
+    setAddToMenu(true);
   };
 
   const handleSavePage = () => {
     if (pageFormData) {
-      // 1. Save content
       if (editingSlug === 'NEW') {
         createPage(pageFormData);
       } else if (editingSlug) {
         updatePage(editingSlug, pageFormData);
       }
 
-      // 2. Handle Navigation Update
       if (addToMenu) {
-        // Check if already exists in navigation to avoid duplicates
         const existsInNav = siteConfig.navigation.some(item => item.slug === pageFormData.slug);
-        
         if (!existsInNav) {
           const newNavItem = {
-            label: pageFormData.title, // Use the page title as label
+            label: pageFormData.title,
             slug: pageFormData.slug
           };
-          
           updateSiteConfig({
             ...siteConfig,
             navigation: [...siteConfig.navigation, newNavItem]
@@ -89,6 +87,54 @@ const AdminPanel: React.FC = () => {
         [e.target.name]: e.target.value
       });
     }
+  };
+
+  // --- TOOLBAR HANDLERS ---
+  const insertTag = (startTag: string, endTag: string = '') => {
+    if (!textAreaRef.current || !pageFormData) return;
+
+    const textarea = textAreaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selection = text.substring(start, end);
+
+    const newText = text.substring(0, start) + startTag + selection + endTag + text.substring(end);
+    
+    setPageFormData({
+      ...pageFormData,
+      body: newText
+    });
+
+    // Restore focus and cursor position (roughly)
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + startTag.length, end + startTag.length);
+    }, 0);
+  };
+
+  const insertTable = () => {
+    const tableTemplate = `
+<table>
+  <thead>
+    <tr>
+      <th>Nagłówek 1</th>
+      <th>Nagłówek 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Dane 1</td>
+      <td>Dane 2</td>
+    </tr>
+    <tr>
+      <td>Dane 3</td>
+      <td>Dane 4</td>
+    </tr>
+  </tbody>
+</table>
+`;
+    insertTag(tableTemplate);
   };
 
   // --- HANDLERS: MEDIA ---
@@ -265,9 +311,6 @@ const AdminPanel: React.FC = () => {
                       <label htmlFor="addToNav" className="text-sm font-medium text-blue-900 flex items-center gap-2 cursor-pointer">
                         <CheckSquare className="w-4 h-4" /> Add to Main Navigation Menu
                       </label>
-                      <span className="text-xs text-blue-600 ml-auto">
-                        Adds a link to this page in the top menu bar automatically.
-                      </span>
                    </div>
 
                    <div>
@@ -276,18 +319,38 @@ const AdminPanel: React.FC = () => {
                          type="text" name="heroImage" value={pageFormData.heroImage} onChange={handlePageInputChange}
                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                       />
-                      {pageFormData.heroImage && (
-                         <div className="mt-2 h-32 w-full overflow-hidden rounded-md border border-gray-200">
-                            <img src={pageFormData.heroImage} alt="Preview" className="w-full h-full object-cover" />
-                         </div>
-                      )}
                    </div>
+                   
+                   {/* Rich Text Editor Toolbar area */}
                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Body Content (Markdown capable)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Content Editor</label>
+                      
+                      {/* TOOLBAR */}
+                      <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-100 border border-gray-300 border-b-0 rounded-t-md">
+                        <button onClick={() => insertTag('<strong>', '</strong>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Pogrubienie"><Bold className="w-4 h-4"/></button>
+                        <button onClick={() => insertTag('<em>', '</em>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Kursywa"><Italic className="w-4 h-4"/></button>
+                        <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                        <button onClick={() => insertTag('<h2>', '</h2>')} className="p-1.5 hover:bg-white rounded text-gray-700 font-bold text-xs" title="Nagłówek 2">H2</button>
+                        <button onClick={() => insertTag('<h3>', '</h3>')} className="p-1.5 hover:bg-white rounded text-gray-700 font-bold text-xs" title="Nagłówek 3">H3</button>
+                        <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                        <button onClick={() => insertTag('<ul>\n  <li>', '</li>\n</ul>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Lista punktowana"><List className="w-4 h-4"/></button>
+                        <button onClick={() => insertTable()} className="p-1.5 hover:bg-white rounded text-gray-700" title="Wstaw Tabelę"><Table className="w-4 h-4"/></button>
+                        <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                        <button onClick={() => insertTag('<a href="#">', '</a>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Link"><LinkIcon className="w-4 h-4"/></button>
+                        <button onClick={() => insertTag('<img src="', '" alt="Opis" />')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Obraz"><ImageIcon className="w-4 h-4"/></button>
+                        <button onClick={() => insertTag('<br />')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Nowa linia"><Type className="w-4 h-4"/></button>
+                      </div>
+
                       <textarea 
-                         name="body" value={pageFormData.body} onChange={handlePageInputChange} rows={12}
-                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                         ref={textAreaRef}
+                         name="body" 
+                         value={pageFormData.body} 
+                         onChange={handlePageInputChange} 
+                         rows={16}
+                         className="w-full px-4 py-2 border border-gray-300 rounded-b-md focus:ring-2 focus:ring-blue-500 font-mono text-sm leading-relaxed"
+                         placeholder="Wpisz treść. Możesz używać HTML lub przycisków powyżej."
                       ></textarea>
+                      <p className="text-xs text-gray-500 mt-1">Użyj paska narzędzi powyżej, aby dodać formatowanie (Tabelki, Pogrubienie, itp.).</p>
                    </div>
                 </div>
              </div>
