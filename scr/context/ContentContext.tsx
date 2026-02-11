@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { MOCK_PAGES, SITE_CONFIG } from '../constants';
 import { PageContent, SiteConfig, MediaItem } from '../types';
+import navigationData from '../content/settings/navigation.json';
 
 interface ContentContextType {
   pages: Record<string, PageContent>;
@@ -62,7 +63,13 @@ const parseMarkdownFile = (fileContent: string): PageContent => {
 export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Stan początkowy
   const [pages, setPages] = useState<Record<string, PageContent>>({});
-  const [siteConfig, setSiteConfig] = useState<SiteConfig>(SITE_CONFIG);
+  
+  // Inicjalizacja konfiguracji z pliku JSON (zarządzanego przez CMS) lub fallback do constants.ts
+  const [siteConfig, setSiteConfig] = useState<SiteConfig>({
+    siteName: SITE_CONFIG.siteName,
+    navigation: (navigationData as any).items || SITE_CONFIG.navigation
+  });
+  
   const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>(INITIAL_MEDIA);
 
   // Efekt: Wczytaj pliki Markdown przy starcie aplikacji
@@ -97,7 +104,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
           setPages(loadedPages);
         } else {
           // Fallback: Jeśli nie znaleziono plików .md, użyj stałych (dla bezpieczeństwa)
-          console.warn("Nie znaleziono plików .md, używam danych zapasowych.");
+          console.warn("Nie znaleziono plików .md, używam danych zapasowych z constants.ts.");
           setPages(MOCK_PAGES);
         }
 
