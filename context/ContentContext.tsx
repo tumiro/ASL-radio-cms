@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { MOCK_PAGES, SITE_CONFIG } from '../constants';
 import { PageContent, SiteConfig, MediaItem } from '../types';
+// Importujemy dane nawigacji z pliku JSON, który jest zarządzany przez CMS
+import navigationData from '../content/settings/navigation.json';
 
 interface ContentContextType {
   // Content
@@ -33,8 +35,12 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   // Pages State
   const [pages, setPages] = useState<Record<string, PageContent>>(MOCK_PAGES);
   
-  // Config State
-  const [siteConfig, setSiteConfig] = useState<SiteConfig>(SITE_CONFIG);
+  // Config State - inicjalizujemy nawigację z pliku JSON
+  // Jeśli plik JSON ma inną strukturę, mapujemy go tutaj
+  const [siteConfig, setSiteConfig] = useState<SiteConfig>({
+    ...SITE_CONFIG,
+    navigation: navigationData.items || SITE_CONFIG.navigation
+  });
 
   // Media State
   const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>(INITIAL_MEDIA);

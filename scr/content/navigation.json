@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "label": "Stacja Główna",
+      "slug": "/"
+    },
+    {
+      "label": "O Klubie",
+      "slug": "/klub",
+      "children": [
+        {
+          "label": "Historia i Zarząd",
+          "slug": "/klub/historia"
+        },
+        {
+          "label": "Nasz Sprzęt (Shack)",
+          "slug": "/klub/sprzet"
+        }
+      ]
+    },
+    {
+      "label": "Aktywność",
+      "slug": "/aktywnosc",
+      "children": [
+        {
+          "label": "Zawody i Dyplomy",
+          "slug": "/aktywnosc/zawody"
+        },
+        {
+          "label": "Wyprawy DX",
+          "slug": "/aktywnosc/dx"
+        },
+        {
+          "label": "Warsztaty Techniczne",
+          "slug": "/aktywnosc/warsztaty"
+        }
+      ]
+    },
+    {
+      "label": "Kontakt / QSL",
+      "slug": "/kontakt"
+    }
+  ]
+}

@@ -1,17 +1,23 @@
 backend:
   name: git-gateway
-  branch: main # Branch to update (change to master if applicable)
+  branch: main
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-# Settings for the editorial workflow
+# Ustawienie slugów dla kolekcji plików (nie folderów) jest zbędne lub inne
+slug:
+  encoding: "ascii"
+  clean_accents: true
+
 publish_mode: editorial_workflow
 
 collections:
+  # Kolekcja stron (pliki markdown)
+  # Aby to działało w pełni, musisz stworzyć folder src/content/pages i pliki .md
   - name: "pages"
     label: "Strony"
-    folder: "src/content/pages" # Decap will save files here
+    folder: "src/content/pages"
     create: true
     slug: "{{slug}}"
     fields:
@@ -19,18 +25,20 @@ collections:
       - {label: "URL Slug", name: "slug", widget: "string"}
       - {label: "Zdjęcie Główne", name: "heroImage", widget: "image"}
       - {label: "Treść", name: "body", widget: "markdown"}
-      - {label: "Sekcje dodatkowe", name: "sections", widget: "list", required: false, fields: [
+      - {label: "Sekcje dodatkowe", name: "sections", widget: "list", collapsed: true, required: false, fields: [
           {label: "Nagłówek", name: "heading", widget: "string"},
           {label: "Treść sekcji", name: "content", widget: "text"},
           {label: "Zdjęcie", name: "image", widget: "image", required: false}
         ]}
 
+  # Kolekcja konfiguracji (pojedyncze pliki)
   - name: "config"
-    label: "Konfiguracja Globalna"
+    label: "Konfiguracja"
     files:
       - name: "navigation"
-        label: "Menu Nawigacyjne"
+        label: "Menu Główne"
         file: "src/content/settings/navigation.json"
+        description: "Edytuj linki w menu głównym"
         fields:
           - label: "Elementy Menu"
             name: "items"
