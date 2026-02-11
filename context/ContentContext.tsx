@@ -16,6 +16,11 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
+// Define globs at the top level to ensure Vite transforms them correctly at build time.
+// This prevents "(intermediate value).glob is not a function" errors.
+const markdownFilesGlob = import.meta.glob('../src/content/pages/*.md', { query: '?raw', import: 'default' });
+const navigationFilesGlob = import.meta.glob('../src/content/settings/navigation.json', { eager: true });
+
 // Helper do prostego parsowania Frontmatter
 const parseMarkdownFile = (fileContent: string): PageContent | null => {
   try {
@@ -65,14 +70,12 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   // --- EFEKT: Ładowanie stron z plików CMS ---
   useEffect(() => {
     // 1. Ładowanie stron Markdown
-    const markdownFiles = import.meta.glob('../src/content/pages/*.md', { query: '?raw', import: 'default' });
-
     const loadCmsPages = async () => {
       const cmsPages: Record<string, PageContent> = {};
       
-      for (const path in markdownFiles) {
+      for (const path in markdownFilesGlob) {
         try {
-          const rawContent = await markdownFiles[path]() as string;
+          const rawContent = await markdownFilesGlob[path]() as string;
           const parsedPage = parseMarkdownFile(rawContent);
           if (parsedPage) {
             cmsPages[parsedPage.slug] = parsedPage;
@@ -92,15 +95,13 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
 
     loadCmsPages();
 
-    // 2. Dynamiczne ładowanie nawigacji (JSON)
-    // Używamy import.meta.glob zamiast zwykłego import(), co jest bezpieczniejsze dla builda
-    const loadNavigation = async () => {
+    // 2. Ładowanie nawigacji z załadowanego wcześniej globu (eager)
+    const loadNavigation = () => {
       try {
-        const navModules = import.meta.glob('../src/content/settings/navigation.json', { eager: true });
         const navPath = '../src/content/settings/navigation.json';
         
-        if (navModules[navPath]) {
-          const navConfig = navModules[navPath] as any;
+        if (navigationFilesGlob[navPath]) {
+          const navConfig = navigationFilesGlob[navPath] as any;
           if (navConfig.default && navConfig.default.items) {
             setSiteConfig(prev => ({
               ...prev,
