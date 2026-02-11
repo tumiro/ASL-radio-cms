@@ -16,42 +16,9 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
-// Define globs at the top level to ensure Vite transforms them correctly at build time.
-// This prevents "(intermediate value).glob is not a function" errors.
-const markdownFilesGlob = import.meta.glob('../src/content/pages/*.md', { query: '?raw', import: 'default' });
-const navigationFilesGlob = import.meta.glob('../src/content/settings/navigation.json', { eager: true });
-
-// Helper do prostego parsowania Frontmatter
-const parseMarkdownFile = (fileContent: string): PageContent | null => {
-  try {
-    const parts = fileContent.split('---');
-    if (parts.length < 3) return null;
-
-    const frontmatterRaw = parts[1];
-    const body = parts.slice(2).join('---').trim();
-
-    const data: any = {};
-    frontmatterRaw.split('\n').forEach(line => {
-      const match = line.match(/^(\w+):\s*(.+)$/);
-      if (match) {
-        let value = match[2].trim();
-        if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
-        data[match[1]] = value;
-      }
-    });
-    
-    return {
-      title: data.title || 'Bez tytułu',
-      slug: data.slug || '/',
-      heroImage: data.heroImage || '',
-      body: body,
-      sections: []
-    };
-  } catch (e) {
-    console.error("Błąd parsowania pliku MD", e);
-    return null;
-  }
-};
+// NOTE: Removed import.meta.glob usage because it causes runtime errors in environments
+// that do not support Vite build-time transformations (e.g. some browser-based previews).
+// The app will initialize with data from constants.ts instead of reading from the file system.
 
 const INITIAL_MEDIA: MediaItem[] = [
   { id: '1', name: 'Antena Yagi', url: 'https://images.unsplash.com/photo-1541873676-a18131494184?auto=format&fit=crop&w=800&q=80' },
@@ -67,56 +34,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>(INITIAL_MEDIA);
 
-  // --- EFEKT: Ładowanie stron z plików CMS ---
-  useEffect(() => {
-    // 1. Ładowanie stron Markdown
-    const loadCmsPages = async () => {
-      const cmsPages: Record<string, PageContent> = {};
-      
-      for (const path in markdownFilesGlob) {
-        try {
-          const rawContent = await markdownFilesGlob[path]() as string;
-          const parsedPage = parseMarkdownFile(rawContent);
-          if (parsedPage) {
-            cmsPages[parsedPage.slug] = parsedPage;
-          }
-        } catch (e) {
-          console.error(`Nie udało się załadować pliku: ${path}`, e);
-        }
-      }
-
-      if (Object.keys(cmsPages).length > 0) {
-        setPages(prev => ({
-          ...prev,
-          ...cmsPages
-        }));
-      }
-    };
-
-    loadCmsPages();
-
-    // 2. Ładowanie nawigacji z załadowanego wcześniej globu (eager)
-    const loadNavigation = () => {
-      try {
-        const navPath = '../src/content/settings/navigation.json';
-        
-        if (navigationFilesGlob[navPath]) {
-          const navConfig = navigationFilesGlob[navPath] as any;
-          if (navConfig.default && navConfig.default.items) {
-            setSiteConfig(prev => ({
-              ...prev,
-              navigation: navConfig.default.items
-            }));
-          }
-        }
-      } catch (e) {
-        console.warn("Błąd ładowania navigation.json. Używam domyślnej konfiguracji.", e);
-      }
-    };
-
-    loadNavigation();
-
-  }, []);
+  // We are skipping the useEffect that loads from import.meta.glob
 
   const updatePage = (originalSlug: string, newPageData: PageContent) => {
     setPages((prevPages) => {
