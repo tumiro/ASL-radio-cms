@@ -10,7 +10,8 @@ import { ContentProvider } from './context/ContentContext';
 // Komponent layoutu, który warunkowo wyświetla Navbar i Footer
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
+  // Hide UI elements on both the local admin and potentially the real admin path
+  const isAdminRoute = location.pathname.startsWith('/local-admin') || location.pathname.startsWith('/admin');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -20,7 +21,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
 
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && (
+        <>
+          <Footer />
+          {/* Version Indicator */}
+          <div className="bg-gray-900 text-gray-700 text-[10px] text-center py-1">
+            Build: v2.2 (Build Fix)
+          </div>
+        </>
+      )}
       
       {/* Widget czatu tylko na stronie głównej, nie w adminie */}
       {!isAdminRoute && <ChatWidget />}
@@ -34,7 +43,7 @@ const App: React.FC = () => {
       <HashRouter>
         <Layout>
           <Routes>
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/local-admin" element={<AdminPanel />} />
             {/* 
               We use a wildcard route to handle all slugs defined in our mock content.
               In a real CMS setup, you might generate these routes statically.
