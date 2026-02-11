@@ -1,14 +1,19 @@
 backend:
   name: git-gateway
-  branch: main
+  branch: main # Upewnij się, że Twoja gałąź na GitHub to 'main', a nie 'master'
+
+# Publikacja: editorial_workflow pozwala na tworzenie szkiców (Drafts) przed publikacją
+publish_mode: editorial_workflow
 
 # Folder gdzie będą trafiać obrazki dodane przez CMS
 media_folder: "public/images/uploads"
 # Ścieżka publiczna (jak obrazki są widoczne w przeglądarce)
 public_folder: "/images/uploads"
 
-# Opcjonalnie: lokalny backend do testów (wymaga npx decap-server)
-# local_backend: true
+# Opcjonalnie: adres URL strony (pomaga przy przekierowaniach)
+site_url: "https://sp-radio.netlify.app"
+display_url: "https://sp-radio.netlify.app"
+logo_url: "https://images.unsplash.com/photo-1541873676-a18131494184?auto=format&fit=crop&w=100&q=80"
 
 collections:
   # Kolekcja stron (pliki markdown)
@@ -19,7 +24,7 @@ collections:
     slug: "{{slug}}"
     fields:
       - {label: "Tytuł", name: "title", widget: "string"}
-      - {label: "URL Slug", name: "slug", widget: "string", hint: "np. /o-nas"}
+      - {label: "URL Slug", name: "slug", widget: "string", hint: "np. /o-nas, musi zaczynać się od /"}
       - {label: "Zdjęcie Główne", name: "heroImage", widget: "image"}
       - {label: "Treść", name: "body", widget: "markdown"}
       - {label: "Sekcje dodatkowe", name: "sections", widget: "list", collapsed: true, required: false, fields: [
