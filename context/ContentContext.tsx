@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { MOCK_PAGES, SITE_CONFIG } from '../constants';
 import { PageContent, SiteConfig, MediaItem } from '../types';
-import navigationData from '../content/settings/navigation.json';
+import navigationData from '../src/content/settings/navigation.json';
 
 interface ContentContextType {
   pages: Record<string, PageContent>;
@@ -74,7 +74,8 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
   // --- EFEKT: Ładowanie stron z plików CMS ---
   useEffect(() => {
     // Vite pozwala na importowanie wielu plików na raz za pomocą glob
-    const markdownFiles = import.meta.glob('../content/pages/*.md', { query: '?raw', import: 'default' });
+    // Poprawiona ścieżka do folderu src/content/pages
+    const markdownFiles = import.meta.glob('../src/content/pages/*.md', { query: '?raw', import: 'default' });
 
     const loadCmsPages = async () => {
       const cmsPages: Record<string, PageContent> = {};
