@@ -24,47 +24,53 @@ const INITIAL_MEDIA: MediaItem[] = [
   { id: '4', name: 'Spotkanie', url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80' },
 ];
 
-// Funkcja parsująca pliki Markdown (Frontmatter + Treść)
+// Ulepszona funkcja parsująca pliki Markdown (odporna na różne znaki nowej linii)
 const parseMarkdownFile = (fileContent: string): PageContent => {
-  // Regex do wyciągnięcia YAML frontmattera (pomiędzy --- a ---)
-  const match = fileContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  
-  if (!match) {
-    // Jeśli plik nie ma poprawnego formatu, zwróć błąd jako treść
-    return { title: 'Błąd formatowania', slug: '/error', heroImage: '', body: fileContent };
+  if (!fileContent) return { title: 'Błąd', slug: '/error', heroImage: '', body: '' };
+
+  // Normalizacja znaków nowej linii (CRLF -> LF) dla Windowsa
+  const normalizedContent = fileContent.replace(/\r\n/g, '\n');
+
+  // Próba podziału pliku na części: [pusta, frontmatter, treść]
+  const parts = normalizedContent.split(/^---$/m);
+
+  if (parts.length >= 3) {
+    const yamlContent = parts[1].trim();
+    // Cała reszta to treść (łączymy z powrotem, jeśli w treści też były ---)
+    const body = parts.slice(2).join('---').trim();
+
+    const metadata: Record<string, string> = {};
+    
+    // Prosty parser YAML (linia po linii)
+    yamlContent.split('\n').forEach(line => {
+      const separatorIndex = line.indexOf(':');
+      if (separatorIndex > -1) {
+        const key = line.slice(0, separatorIndex).trim();
+        let value = line.slice(separatorIndex + 1).trim();
+        // Usuń cudzysłowy jeśli istnieją
+        if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+        metadata[key] = value;
+      }
+    });
+
+    return {
+      title: metadata.title || 'Bez tytułu',
+      slug: metadata.slug || '/',
+      heroImage: metadata.heroImage || '',
+      body: body,
+      sections: []
+    };
   }
 
-  const yamlContent = match[1];
-  const body = match[2].trim();
-
-  const metadata: Record<string, string> = {};
-  
-  // Prosty parser YAML (klucz: wartość)
-  yamlContent.split('\n').forEach(line => {
-    const parts = line.split(':');
-    if (parts.length >= 2) {
-      const key = parts[0].trim();
-      let value = parts.slice(1).join(':').trim();
-      // Usuń cudzysłowy jeśli istnieją
-      if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
-      metadata[key] = value;
-    }
-  });
-
-  return {
-    title: metadata.title || 'Bez tytułu',
-    slug: metadata.slug || '/',
-    heroImage: metadata.heroImage || '',
-    body: body,
-    sections: [] // CMS w tym trybie zarządza głównie body, sekcje są opcjonalne
-  };
+  // Fallback: jeśli formatowanie jest inne niż oczekiwane
+  return { title: 'Błąd formatowania pliku', slug: '/error-format', heroImage: '', body: fileContent, sections: [] };
 };
 
 export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Stan początkowy
   const [pages, setPages] = useState<Record<string, PageContent>>({});
   
-  // Inicjalizacja konfiguracji z pliku JSON (zarządzanego przez CMS) lub fallback do constants.ts
+  // Inicjalizacja konfiguracji z pliku JSON lub fallback
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({
     siteName: SITE_CONFIG.siteName,
     navigation: (navigationData as any).items || SITE_CONFIG.navigation
@@ -78,7 +84,6 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
       try {
         // Vite glob import - kluczowy element łączący pliki z kodem
         // Importujemy jako surowy tekst (?raw), żeby samemu sparsować
-        // Używamy rzutowania (as any) aby uniknąć błędów TypeScript przy kompilacji
         const modules = (import.meta as any).glob('../content/pages/*.md', { query: '?raw', import: 'default' });
         
         const loadedPages: Record<string, PageContent> = {};
@@ -90,7 +95,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
             const rawContent = await modules[path]() as string;
             const parsedPage = parseMarkdownFile(rawContent);
             
-            // Jeśli parsowanie się udało, dodaj do stanu
+            // Jeśli parsowanie się udało i mamy slug, dodaj do stanu
             if (parsedPage.slug) {
               loadedPages[parsedPage.slug] = parsedPage;
               filesCount++;
@@ -101,11 +106,10 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
         }
 
         if (filesCount > 0) {
-          console.log(`Wczytano ${filesCount} stron z systemu plików.`);
+          console.log(`[ContentContext] Wczytano ${filesCount} stron z plików .md`);
           setPages(loadedPages);
         } else {
-          // Fallback: Jeśli nie znaleziono plików .md, użyj stałych (dla bezpieczeństwa)
-          console.warn("Nie znaleziono plików .md, używam danych zapasowych z constants.ts.");
+          console.warn("[ContentContext] Nie znaleziono plików .md, używam danych przykładowych.");
           setPages(MOCK_PAGES);
         }
 

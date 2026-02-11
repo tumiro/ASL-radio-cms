@@ -6,7 +6,11 @@ import Button from './ui/Button';
 import { PageContent } from '../types';
 
 const AdminPanel: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Inicjalizacja stanu bezpośrednio z localStorage - eliminuje mignięcie ekranu logowania
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('localAdminLoggedIn') === 'true';
+  });
+
   const [activeTab, setActiveTab] = useState<'content' | 'media' | 'settings'>('content');
   
   const { 
@@ -32,15 +36,6 @@ const AdminPanel: React.FC = () => {
 
   // Media State
   const [newImageUrl, setNewImageUrl] = useState('');
-
-  // Debug & Auth Persistence
-  useEffect(() => {
-    // Sprawdź, czy użytkownik był wcześniej zalogowany
-    const wasLoggedIn = localStorage.getItem('localAdminLoggedIn');
-    if (wasLoggedIn === 'true') {
-      setIsLoggedIn(true);
-    }
-  }, []);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -204,7 +199,7 @@ const AdminPanel: React.FC = () => {
             <div className="text-center mb-6">
               <p className="text-gray-600 mb-4">Zaloguj się, aby edytować treści</p>
               <div className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded border border-yellow-200 mb-2">
-                Wersja 2.4 (Persistence)
+                Wersja 2.5 (Fast Load)
               </div>
             </div>
             {/* ZIELONY PRZYCISK DLA WERYFIKACJI */}
@@ -213,7 +208,7 @@ const AdminPanel: React.FC = () => {
               className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-3 hover:bg-green-700 transition-colors shadow-lg"
             >
               <Github className="w-5 h-5" />
-              Zaloguj do Panelu v2.4
+              Zaloguj do Panelu v2.5
             </button>
             <div className="mt-6 text-center text-xs text-gray-400">
               <p>Symulacja uwierzytelniania</p>
@@ -431,7 +426,7 @@ const AdminPanel: React.FC = () => {
             <div className="bg-blue-50 border-b border-blue-100 p-4 px-8 flex items-start gap-3">
                <Info className="w-5 h-5 text-blue-600 mt-0.5" />
                <div className="text-sm text-blue-800">
-                  <strong>Witaj w panelu v2.4!</strong> <br/>
+                  <strong>Witaj w panelu v2.5!</strong> <br/>
                   Aby zobaczyć <strong>pasek narzędzi edycji</strong> i zmieniać treść, kliknij ikonę ołówka (<PenTool className="w-3 h-3 inline"/>) przy wybranej stronie poniżej.
                </div>
             </div>
