@@ -20,7 +20,7 @@ const AdminPanel: React.FC = () => {
   const [pageFormData, setPageFormData] = useState<PageContent | null>(null);
   const [addToMenu, setAddToMenu] = useState(false);
   
-  // Preview Mode State for Editor (To jest nowa funkcja, której Ci brakowało)
+  // Preview Mode State for Editor
   const [showHtmlPreview, setShowHtmlPreview] = useState(false);
   
   // Ref do textarea, aby móc wstawiać tekst w miejscu kursora
@@ -263,7 +263,8 @@ const AdminPanel: React.FC = () => {
         {/* --- CONTENT TAB: EDITOR --- */}
         {activeTab === 'content' && editingSlug && pageFormData && (
           <div className="flex-1 flex flex-col h-full bg-white animate-in slide-in-from-right-4 duration-200">
-             <div className="h-16 border-b border-gray-200 flex items-center justify-between px-6 bg-gray-50">
+             {/* STICKY HEADER - Always visible */}
+             <div className="sticky top-0 z-20 h-16 border-b border-gray-200 flex items-center justify-between px-6 bg-gray-50 shadow-sm">
                 <div className="flex items-center gap-4">
                    <h2 className="text-lg font-bold text-gray-800">
                       {editingSlug === 'NEW' ? 'Creating New Page' : `Editing: ${pageFormData.title}`}
@@ -281,6 +282,8 @@ const AdminPanel: React.FC = () => {
                    </Button>
                 </div>
              </div>
+             
+             {/* Scrollable Content */}
              <div className="flex-1 overflow-y-auto p-8">
                 <div className="max-w-3xl mx-auto space-y-6">
                    <div className="grid grid-cols-2 gap-6">
@@ -334,7 +337,7 @@ const AdminPanel: React.FC = () => {
                    {/* Rich Text Editor Toolbar area */}
                    <div className="relative">
                       <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-700">Body Content (HTML Capable)</label>
+                        <label className="block text-sm font-bold text-blue-700">Treść Strony (Edytor HTML)</label>
                         <button 
                           onClick={() => setShowHtmlPreview(!showHtmlPreview)}
                           className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded-full font-medium transition-colors"
@@ -344,8 +347,9 @@ const AdminPanel: React.FC = () => {
                       </div>
                       
                       {/* TOOLBAR (Widoczny tylko w trybie edycji) */}
+                      {/* Sticky Top-16 because the header is h-16 (4rem) */}
                       {!showHtmlPreview && (
-                        <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-gray-50 border border-gray-300 border-b-0 rounded-t-md shadow-sm">
+                        <div className="sticky top-0 md:top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-gray-50 border border-gray-300 border-b-0 rounded-t-md shadow-sm">
                           <button onClick={() => insertTag('<strong>', '</strong>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Bold"><Bold className="w-4 h-4"/></button>
                           <button onClick={() => insertTag('<em>', '</em>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Italic"><Italic className="w-4 h-4"/></button>
                           <div className="w-px h-5 bg-gray-300 mx-1"></div>
