@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useContent } from '../context/ContentContext';
-import { Layout, FileText, Settings, LogOut, Github, Search, PenTool, Save, Plus, Trash2, Image as ImageIcon, CheckSquare, ExternalLink, Bold, Italic, List, Type, Link as LinkIcon, Table, Code } from 'lucide-react';
+import { Layout, FileText, Settings, LogOut, Github, Search, PenTool, Save, Plus, Trash2, Image as ImageIcon, CheckSquare, ExternalLink, Bold, Italic, List, Type, Link as LinkIcon, Table, Eye, Code as CodeIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from './ui/Button';
 import { PageContent } from '../types';
@@ -20,6 +20,9 @@ const AdminPanel: React.FC = () => {
   const [pageFormData, setPageFormData] = useState<PageContent | null>(null);
   const [addToMenu, setAddToMenu] = useState(false);
   
+  // Preview Mode State for Editor
+  const [showHtmlPreview, setShowHtmlPreview] = useState(false);
+  
   // Ref do textarea, aby móc wstawiać tekst w miejscu kursora
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -34,6 +37,7 @@ const AdminPanel: React.FC = () => {
   const handleEditClick = (slug: string) => {
     setEditingSlug(slug);
     setPageFormData({ ...pages[slug] });
+    setShowHtmlPreview(false);
     
     // Check if page is already in navigation
     const isInNav = siteConfig.navigation.some(item => item.slug === slug);
@@ -51,6 +55,7 @@ const AdminPanel: React.FC = () => {
     setEditingSlug('NEW');
     setPageFormData(newPage);
     setAddToMenu(true);
+    setShowHtmlPreview(false);
   };
 
   const handleSavePage = () => {
@@ -106,7 +111,7 @@ const AdminPanel: React.FC = () => {
       body: newText
     });
 
-    // Restore focus and cursor position (roughly)
+    // Restore focus and cursor position
     setTimeout(() => {
       textarea.focus();
       textarea.setSelectionRange(start + startTag.length, end + startTag.length);
@@ -319,38 +324,68 @@ const AdminPanel: React.FC = () => {
                          type="text" name="heroImage" value={pageFormData.heroImage} onChange={handlePageInputChange}
                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                       />
+                      {/* Live Image Preview */}
+                      {pageFormData.heroImage && (
+                        <div className="mt-2 relative h-48 w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-gray-50">
+                          <img src={pageFormData.heroImage} alt="Hero Preview" className="w-full h-full object-cover" 
+                               onError={(e) => (e.currentTarget.style.display = 'none')}
+                          />
+                          <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">Image Preview</div>
+                        </div>
+                      )}
                    </div>
                    
                    {/* Rich Text Editor Toolbar area */}
-                   <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Content Editor</label>
-                      
-                      {/* TOOLBAR */}
-                      <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-100 border border-gray-300 border-b-0 rounded-t-md">
-                        <button onClick={() => insertTag('<strong>', '</strong>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Pogrubienie"><Bold className="w-4 h-4"/></button>
-                        <button onClick={() => insertTag('<em>', '</em>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Kursywa"><Italic className="w-4 h-4"/></button>
-                        <div className="w-px h-5 bg-gray-300 mx-1"></div>
-                        <button onClick={() => insertTag('<h2>', '</h2>')} className="p-1.5 hover:bg-white rounded text-gray-700 font-bold text-xs" title="Nagłówek 2">H2</button>
-                        <button onClick={() => insertTag('<h3>', '</h3>')} className="p-1.5 hover:bg-white rounded text-gray-700 font-bold text-xs" title="Nagłówek 3">H3</button>
-                        <div className="w-px h-5 bg-gray-300 mx-1"></div>
-                        <button onClick={() => insertTag('<ul>\n  <li>', '</li>\n</ul>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Lista punktowana"><List className="w-4 h-4"/></button>
-                        <button onClick={() => insertTable()} className="p-1.5 hover:bg-white rounded text-gray-700" title="Wstaw Tabelę"><Table className="w-4 h-4"/></button>
-                        <div className="w-px h-5 bg-gray-300 mx-1"></div>
-                        <button onClick={() => insertTag('<a href="#">', '</a>')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Link"><LinkIcon className="w-4 h-4"/></button>
-                        <button onClick={() => insertTag('<img src="', '" alt="Opis" />')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Obraz"><ImageIcon className="w-4 h-4"/></button>
-                        <button onClick={() => insertTag('<br />')} className="p-1.5 hover:bg-white rounded text-gray-700" title="Nowa linia"><Type className="w-4 h-4"/></button>
+                   <div className="relative">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700">Body Content (HTML Capable)</label>
+                        <button 
+                          onClick={() => setShowHtmlPreview(!showHtmlPreview)}
+                          className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded-full font-medium transition-colors"
+                        >
+                           {showHtmlPreview ? <><CodeIcon className="w-3 h-3" /> Edit Code</> : <><Eye className="w-3 h-3" /> Show Preview</>}
+                        </button>
                       </div>
+                      
+                      {/* TOOLBAR (Only visible in Edit Mode) */}
+                      {!showHtmlPreview && (
+                        <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-gray-50 border border-gray-300 border-b-0 rounded-t-md shadow-sm">
+                          <button onClick={() => insertTag('<strong>', '</strong>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Bold"><Bold className="w-4 h-4"/></button>
+                          <button onClick={() => insertTag('<em>', '</em>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Italic"><Italic className="w-4 h-4"/></button>
+                          <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                          <button onClick={() => insertTag('<h2>', '</h2>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 font-bold text-xs w-8" title="H2 Header">H2</button>
+                          <button onClick={() => insertTag('<h3>', '</h3>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 font-bold text-xs w-8" title="H3 Header">H3</button>
+                          <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                          <button onClick={() => insertTag('<ul>\n  <li>', '</li>\n</ul>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Bullet List"><List className="w-4 h-4"/></button>
+                          <button onClick={() => insertTable()} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Insert Table"><Table className="w-4 h-4"/></button>
+                          <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                          <button onClick={() => insertTag('<a href="#">', '</a>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Link"><LinkIcon className="w-4 h-4"/></button>
+                          <button onClick={() => insertTag('<img src="', '" alt="Opis" />')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Image"><ImageIcon className="w-4 h-4"/></button>
+                          <button onClick={() => insertTag('<br />')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Line Break"><Type className="w-4 h-4"/></button>
+                        </div>
+                      )}
 
-                      <textarea 
-                         ref={textAreaRef}
-                         name="body" 
-                         value={pageFormData.body} 
-                         onChange={handlePageInputChange} 
-                         rows={16}
-                         className="w-full px-4 py-2 border border-gray-300 rounded-b-md focus:ring-2 focus:ring-blue-500 font-mono text-sm leading-relaxed"
-                         placeholder="Wpisz treść. Możesz używać HTML lub przycisków powyżej."
-                      ></textarea>
-                      <p className="text-xs text-gray-500 mt-1">Użyj paska narzędzi powyżej, aby dodać formatowanie (Tabelki, Pogrubienie, itp.).</p>
+                      {showHtmlPreview ? (
+                        <div className="w-full px-6 py-6 border border-gray-300 rounded-md bg-white min-h-[400px] html-content prose prose-lg prose-slate max-w-none">
+                          <div dangerouslySetInnerHTML={{ __html: pageFormData.body }} />
+                        </div>
+                      ) : (
+                        <textarea 
+                           ref={textAreaRef}
+                           name="body" 
+                           value={pageFormData.body} 
+                           onChange={handlePageInputChange} 
+                           rows={18}
+                           className="w-full px-4 py-3 border border-gray-300 rounded-b-md focus:ring-2 focus:ring-blue-500 font-mono text-sm leading-relaxed"
+                           placeholder="Type here. HTML tags supported."
+                        ></textarea>
+                      )}
+                      
+                      {!showHtmlPreview && (
+                         <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                           <CodeIcon className="w-3 h-3" /> You are editing in RAW HTML mode. Use the toolbar above to assist.
+                         </p>
+                      )}
                    </div>
                 </div>
              </div>
