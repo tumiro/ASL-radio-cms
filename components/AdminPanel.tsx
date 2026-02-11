@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useContent } from '../context/ContentContext';
-import { Layout, FileText, Settings, LogOut, Github, Search, PenTool, Save, Plus, Trash2, Image as ImageIcon, CheckSquare, ExternalLink, Bold, Italic, List, Type, Link as LinkIcon, Table, Eye, Code as CodeIcon } from 'lucide-react';
+import { Layout, FileText, Settings, LogOut, Github, Search, PenTool, Save, Plus, Trash2, Image as ImageIcon, CheckSquare, ExternalLink, Bold, Italic, List, Type, Link as LinkIcon, Table, Eye, Code as CodeIcon, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from './ui/Button';
 import { PageContent } from '../types';
@@ -182,13 +182,17 @@ const AdminPanel: React.FC = () => {
           <div className="p-8">
             <div className="text-center mb-6">
               <p className="text-gray-600 mb-4">Zaloguj się, aby edytować treści</p>
+              <div className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded border border-yellow-200">
+                Wersja 2.0 (Nowy Edytor)
+              </div>
             </div>
+            {/* ZIELONY PRZYCISK DLA WERYFIKACJI */}
             <button 
               onClick={() => setIsLoggedIn(true)}
-              className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-3 hover:bg-gray-800 transition-colors shadow-lg"
+              className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-3 hover:bg-green-700 transition-colors shadow-lg"
             >
               <Github className="w-5 h-5" />
-              Login with GitHub
+              Zaloguj do Panelu v2.0
             </button>
             <div className="mt-6 text-center text-xs text-gray-400">
               <p>Symulacja uwierzytelniania</p>
@@ -342,23 +346,23 @@ const AdminPanel: React.FC = () => {
                           onClick={() => setShowHtmlPreview(!showHtmlPreview)}
                           className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded-full font-medium transition-colors"
                         >
-                           {showHtmlPreview ? <><CodeIcon className="w-3 h-3" /> Edit Code</> : <><Eye className="w-3 h-3" /> Show Preview</>}
+                           {showHtmlPreview ? <><CodeIcon className="w-3 h-3" /> Edytuj Kod</> : <><Eye className="w-3 h-3" /> Podgląd</>}
                         </button>
                       </div>
                       
-                      {/* TOOLBAR (Widoczny tylko w trybie edycji) */}
-                      {/* Sticky Top-16 because the header is h-16 (4rem) */}
+                      {/* TOOLBAR - Zmiana koloru tła dla lepszej widoczności */}
                       {!showHtmlPreview && (
-                        <div className="sticky top-0 md:top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-gray-50 border border-gray-300 border-b-0 rounded-t-md shadow-sm">
+                        <div className="sticky top-0 md:top-0 z-10 flex flex-wrap items-center gap-1 p-2 bg-blue-50 border border-blue-200 border-b-0 rounded-t-md shadow-sm">
+                          <span className="text-[10px] font-bold text-blue-400 mr-2 uppercase tracking-wider">Narzędzia:</span>
                           <button onClick={() => insertTag('<strong>', '</strong>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Bold"><Bold className="w-4 h-4"/></button>
                           <button onClick={() => insertTag('<em>', '</em>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Italic"><Italic className="w-4 h-4"/></button>
-                          <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                          <div className="w-px h-5 bg-blue-200 mx-1"></div>
                           <button onClick={() => insertTag('<h2>', '</h2>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 font-bold text-xs w-8" title="H2 Header">H2</button>
                           <button onClick={() => insertTag('<h3>', '</h3>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 font-bold text-xs w-8" title="H3 Header">H3</button>
-                          <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                          <div className="w-px h-5 bg-blue-200 mx-1"></div>
                           <button onClick={() => insertTag('<ul>\n  <li>', '</li>\n</ul>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Bullet List"><List className="w-4 h-4"/></button>
                           <button onClick={() => insertTable()} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Insert Table"><Table className="w-4 h-4"/></button>
-                          <div className="w-px h-5 bg-gray-300 mx-1"></div>
+                          <div className="w-px h-5 bg-blue-200 mx-1"></div>
                           <button onClick={() => insertTag('<a href="#">', '</a>')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Link"><LinkIcon className="w-4 h-4"/></button>
                           <button onClick={() => insertTag('<img src="', '" alt="Opis" />')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Image"><ImageIcon className="w-4 h-4"/></button>
                           <button onClick={() => insertTag('<br />')} className="p-1.5 hover:bg-white hover:shadow-sm rounded text-gray-700 transition-all" title="Line Break"><Type className="w-4 h-4"/></button>
@@ -376,14 +380,14 @@ const AdminPanel: React.FC = () => {
                            value={pageFormData.body} 
                            onChange={handlePageInputChange} 
                            rows={18}
-                           className="w-full px-4 py-3 border border-gray-300 rounded-b-md focus:ring-2 focus:ring-blue-500 font-mono text-sm leading-relaxed"
+                           className="w-full px-4 py-3 border border-blue-200 rounded-b-md focus:ring-2 focus:ring-blue-500 font-mono text-sm leading-relaxed"
                            placeholder="Type here. HTML tags supported."
                         ></textarea>
                       )}
                       
                       {!showHtmlPreview && (
                          <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                           <CodeIcon className="w-3 h-3" /> You are editing in RAW HTML mode. Use the toolbar above to assist.
+                           <CodeIcon className="w-3 h-3" /> Jesteś w trybie edycji kodu HTML. Użyj paska powyżej, aby dodać formatowanie.
                          </p>
                       )}
                    </div>
@@ -401,6 +405,16 @@ const AdminPanel: React.FC = () => {
                  <Plus className="w-4 h-4" /> New Entry
               </Button>
             </header>
+            
+            {/* INSTRUCTION BANNER */}
+            <div className="bg-blue-50 border-b border-blue-100 p-4 px-8 flex items-start gap-3">
+               <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+               <div className="text-sm text-blue-800">
+                  <strong>Witaj w panelu v2.0!</strong> <br/>
+                  Aby zobaczyć <strong>pasek narzędzi edycji</strong> i zmieniać treść, kliknij ikonę ołówka (<PenTool className="w-3 h-3 inline"/>) przy wybranej stronie poniżej.
+               </div>
+            </div>
+
             <div className="flex-1 overflow-auto p-8">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="p-4 border-b border-gray-100 flex gap-4 bg-gray-50">
@@ -423,7 +437,7 @@ const AdminPanel: React.FC = () => {
                         <td className="px-6 py-4"><div className="font-medium text-gray-900">{page.title}</div></td>
                         <td className="px-6 py-4 text-sm text-gray-500 font-mono">{page.slug}</td>
                         <td className="px-6 py-4 text-right">
-                          <button onClick={() => handleEditClick(page.slug)} className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors">
+                          <button onClick={() => handleEditClick(page.slug)} className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors" title="Edytuj stronę">
                             <PenTool className="w-4 h-4" />
                           </button>
                         </td>
