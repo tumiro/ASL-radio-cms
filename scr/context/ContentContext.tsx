@@ -78,6 +78,7 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
       try {
         // Vite glob import - kluczowy element łączący pliki z kodem
         // Importujemy jako surowy tekst (?raw), żeby samemu sparsować
+        // Używamy rzutowania (as any) aby uniknąć błędów TypeScript przy kompilacji
         const modules = (import.meta as any).glob('../content/pages/*.md', { query: '?raw', import: 'default' });
         
         const loadedPages: Record<string, PageContent> = {};
