@@ -33,10 +33,26 @@ const AdminPanel: React.FC = () => {
   // Media State
   const [newImageUrl, setNewImageUrl] = useState('');
 
-  // Debug: Logowanie przy montowaniu komponentu
+  // Debug & Auth Persistence
   useEffect(() => {
-    console.log("AdminPanel v2.3 (Fix) loaded");
+    console.log("AdminPanel v2.4 (Persistence) loaded");
+    
+    // Sprawdź, czy użytkownik był wcześniej zalogowany
+    const wasLoggedIn = localStorage.getItem('localAdminLoggedIn');
+    if (wasLoggedIn === 'true') {
+      setIsLoggedIn(true);
+    }
   }, []);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem('localAdminLoggedIn', 'true');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('localAdminLoggedIn');
+  };
 
   // --- HANDLERS: PAGES ---
   const handleEditClick = (slug: string) => {
@@ -190,16 +206,16 @@ const AdminPanel: React.FC = () => {
             <div className="text-center mb-6">
               <p className="text-gray-600 mb-4">Zaloguj się, aby edytować treści</p>
               <div className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded border border-yellow-200 mb-2">
-                Wersja 2.3 (Fix)
+                Wersja 2.4 (Persistence)
               </div>
             </div>
             {/* ZIELONY PRZYCISK DLA WERYFIKACJI */}
             <button 
-              onClick={() => setIsLoggedIn(true)}
+              onClick={handleLogin}
               className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-3 hover:bg-green-700 transition-colors shadow-lg"
             >
               <Github className="w-5 h-5" />
-              Zaloguj do Panelu v2.3
+              Zaloguj do Panelu v2.4
             </button>
             <div className="mt-6 text-center text-xs text-gray-400">
               <p>Symulacja uwierzytelniania</p>
@@ -257,7 +273,7 @@ const AdminPanel: React.FC = () => {
             </div>
           </div>
           <button 
-            onClick={() => setIsLoggedIn(false)}
+            onClick={handleLogout}
             className="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition-colors"
           >
             <LogOut className="w-4 h-4" /> Log Out
@@ -417,7 +433,7 @@ const AdminPanel: React.FC = () => {
             <div className="bg-blue-50 border-b border-blue-100 p-4 px-8 flex items-start gap-3">
                <Info className="w-5 h-5 text-blue-600 mt-0.5" />
                <div className="text-sm text-blue-800">
-                  <strong>Witaj w panelu v2.3!</strong> <br/>
+                  <strong>Witaj w panelu v2.4!</strong> <br/>
                   Aby zobaczyć <strong>pasek narzędzi edycji</strong> i zmieniać treść, kliknij ikonę ołówka (<PenTool className="w-3 h-3 inline"/>) przy wybranej stronie poniżej.
                </div>
             </div>

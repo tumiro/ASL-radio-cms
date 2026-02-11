@@ -10,9 +10,9 @@ media_folder: "public/images/uploads"
 # Ścieżka publiczna (jak obrazki są widoczne w przeglądarce)
 public_folder: "/images/uploads"
 
-# Opcjonalnie: adres URL strony (pomaga przy przekierowaniach)
-site_url: "https://sp-radio.netlify.app"
-display_url: "https://sp-radio.netlify.app"
+# Adres Twojej strony (naprawiony link)
+site_url: "https://sm7vms.netlify.app"
+display_url: "https://sm7vms.netlify.app"
 logo_url: "https://images.unsplash.com/photo-1541873676-a18131494184?auto=format&fit=crop&w=100&q=80"
 
 collections:
