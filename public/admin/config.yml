@@ -2,19 +2,16 @@ backend:
   name: git-gateway
   branch: main
 
+# Folder gdzie będą trafiać obrazki dodane przez CMS
 media_folder: "public/images/uploads"
+# Ścieżka publiczna (jak obrazki są widoczne w przeglądarce)
 public_folder: "/images/uploads"
 
-# Ustawienie slugów dla kolekcji plików (nie folderów) jest zbędne lub inne
-slug:
-  encoding: "ascii"
-  clean_accents: true
-
-publish_mode: editorial_workflow
+# Opcjonalnie: lokalny backend do testów (wymaga npx decap-server)
+# local_backend: true
 
 collections:
   # Kolekcja stron (pliki markdown)
-  # Aby to działało w pełni, musisz stworzyć folder src/content/pages i pliki .md
   - name: "pages"
     label: "Strony"
     folder: "src/content/pages"
@@ -22,7 +19,7 @@ collections:
     slug: "{{slug}}"
     fields:
       - {label: "Tytuł", name: "title", widget: "string"}
-      - {label: "URL Slug", name: "slug", widget: "string"}
+      - {label: "URL Slug", name: "slug", widget: "string", hint: "np. /o-nas"}
       - {label: "Zdjęcie Główne", name: "heroImage", widget: "image"}
       - {label: "Treść", name: "body", widget: "markdown"}
       - {label: "Sekcje dodatkowe", name: "sections", widget: "list", collapsed: true, required: false, fields: [

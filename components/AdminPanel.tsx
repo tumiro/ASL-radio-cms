@@ -439,7 +439,7 @@ const AdminPanel: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {Object.values(pages).map((page) => (
+                    {Object.values(pages).map((page: PageContent) => (
                       <tr key={page.slug} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4"><div className="font-medium text-gray-900">{page.title}</div></td>
                         <td className="px-6 py-4 text-sm text-gray-500 font-mono">{page.slug}</td>
