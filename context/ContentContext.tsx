@@ -1,21 +1,15 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { MOCK_PAGES, SITE_CONFIG } from '../constants';
 import { PageContent, SiteConfig, MediaItem } from '../types';
-// Importujemy dane nawigacji z pliku JSON, który jest zarządzany przez CMS
 import navigationData from '../content/settings/navigation.json';
 
 interface ContentContextType {
-  // Content
   pages: Record<string, PageContent>;
   updatePage: (originalSlug: string, newPageData: PageContent) => void;
   createPage: (newPageData: PageContent) => void;
   deletePage: (slug: string) => void;
-  
-  // Settings
   siteConfig: SiteConfig;
   updateSiteConfig: (newConfig: SiteConfig) => void;
-
-  // Media
   mediaLibrary: MediaItem[];
   addMedia: (item: MediaItem) => void;
   removeMedia: (id: string) => void;
@@ -23,7 +17,43 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
-// Initial Mock Media
+// Helper do prostego parsowania Frontmatter (używany, gdy nie mamy backendu node.js w runtime)
+const parseMarkdownFile = (fileContent: string): PageContent | null => {
+  try {
+    // Rozdzielamy Frontmatter (pomiędzy ---) od treści
+    const parts = fileContent.split('---');
+    if (parts.length < 3) return null; // Niepoprawny format
+
+    const frontmatterRaw = parts[1];
+    const body = parts.slice(2).join('---').trim();
+
+    // Prosty parser YAML (klucz: wartość)
+    const data: any = {};
+    frontmatterRaw.split('\n').forEach(line => {
+      const match = line.match(/^(\w+):\s*(.+)$/);
+      if (match) {
+        let value = match[2].trim();
+        // Usuwamy cudzysłowy jeśli są
+        if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+        data[match[1]] = value;
+      }
+    });
+
+    // Parsowanie sekcji (jeśli istnieją w specyficznym formacie CMS - tu uproszczone)
+    
+    return {
+      title: data.title || 'Bez tytułu',
+      slug: data.slug || '/',
+      heroImage: data.heroImage || '',
+      body: body,
+      sections: [] // Sekcje są trudniejsze do sparsowania bez biblioteki YAML, zostawiamy puste dla prostoty
+    };
+  } catch (e) {
+    console.error("Błąd parsowania pliku MD", e);
+    return null;
+  }
+};
+
 const INITIAL_MEDIA: MediaItem[] = [
   { id: '1', name: 'Antena Yagi', url: 'https://images.unsplash.com/photo-1541873676-a18131494184?auto=format&fit=crop&w=800&q=80' },
   { id: '2', name: 'Radio Shack', url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80' },
@@ -32,20 +62,50 @@ const INITIAL_MEDIA: MediaItem[] = [
 ];
 
 export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Pages State
   const [pages, setPages] = useState<Record<string, PageContent>>(MOCK_PAGES);
   
-  // Config State - inicjalizujemy nawigację z pliku JSON
-  // Jeśli plik JSON ma inną strukturę, mapujemy go tutaj
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({
     ...SITE_CONFIG,
     navigation: navigationData.items || SITE_CONFIG.navigation
   });
 
-  // Media State
   const [mediaLibrary, setMediaLibrary] = useState<MediaItem[]>(INITIAL_MEDIA);
 
-  // --- Pages Logic ---
+  // --- EFEKT: Ładowanie stron z plików CMS ---
+  useEffect(() => {
+    // Vite pozwala na importowanie wielu plików na raz za pomocą glob
+    const markdownFiles = import.meta.glob('../content/pages/*.md', { query: '?raw', import: 'default' });
+
+    const loadCmsPages = async () => {
+      const cmsPages: Record<string, PageContent> = {};
+      
+      for (const path in markdownFiles) {
+        try {
+          const rawContent = await markdownFiles[path]() as string;
+          const parsedPage = parseMarkdownFile(rawContent);
+          if (parsedPage) {
+            // Używamy sluga z pliku jako klucza
+            cmsPages[parsedPage.slug] = parsedPage;
+          }
+        } catch (e) {
+          console.error(`Nie udało się załadować pliku: ${path}`, e);
+        }
+      }
+
+      // Łączymy MOCK_PAGES (startowe) z tymi z CMS. 
+      // Zmiany z CMS nadpisują mocki.
+      if (Object.keys(cmsPages).length > 0) {
+        setPages(prev => ({
+          ...prev,
+          ...cmsPages
+        }));
+      }
+    };
+
+    loadCmsPages();
+  }, []);
+
+  // --- Logic Functions ---
   const updatePage = (originalSlug: string, newPageData: PageContent) => {
     setPages((prevPages) => {
       const newPages = { ...prevPages };
@@ -72,12 +132,10 @@ export const ContentProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
-  // --- Settings Logic ---
   const updateSiteConfig = (newConfig: SiteConfig) => {
     setSiteConfig(newConfig);
   };
 
-  // --- Media Logic ---
   const addMedia = (item: MediaItem) => {
     setMediaLibrary(prev => [item, ...prev]);
   };
