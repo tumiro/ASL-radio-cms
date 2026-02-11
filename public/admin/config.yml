@@ -1,0 +1,44 @@
+backend:
+  name: git-gateway
+  branch: main # Branch to update (change to master if applicable)
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+# Settings for the editorial workflow
+publish_mode: editorial_workflow
+
+collections:
+  - name: "pages"
+    label: "Strony"
+    folder: "src/content/pages" # Decap will save files here
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Tytuł", name: "title", widget: "string"}
+      - {label: "URL Slug", name: "slug", widget: "string"}
+      - {label: "Zdjęcie Główne", name: "heroImage", widget: "image"}
+      - {label: "Treść", name: "body", widget: "markdown"}
+      - {label: "Sekcje dodatkowe", name: "sections", widget: "list", required: false, fields: [
+          {label: "Nagłówek", name: "heading", widget: "string"},
+          {label: "Treść sekcji", name: "content", widget: "text"},
+          {label: "Zdjęcie", name: "image", widget: "image", required: false}
+        ]}
+
+  - name: "config"
+    label: "Konfiguracja Globalna"
+    files:
+      - name: "navigation"
+        label: "Menu Nawigacyjne"
+        file: "src/content/settings/navigation.json"
+        fields:
+          - label: "Elementy Menu"
+            name: "items"
+            widget: "list"
+            fields:
+              - {label: "Etykieta", name: "label", widget: "string"}
+              - {label: "Ścieżka", name: "slug", widget: "string"}
+              - {label: "Podmenu (opcjonalne)", name: "children", widget: "list", required: false, fields: [
+                  {label: "Etykieta", name: "label", widget: "string"},
+                  {label: "Ścieżka", name: "slug", widget: "string"}
+                ]}
